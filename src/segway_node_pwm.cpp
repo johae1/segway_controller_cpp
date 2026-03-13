@@ -18,6 +18,11 @@
 #include "std_msgs/msg/multi_array_dimension.hpp"
 #include "turtlebot3_node/msg/wheel_pwm.hpp"
 
+namespace
+{
+constexpr int kPwmLimit = 885;
+}
+
 // ---------------------------------------------------------------------------
 // Diskreter Tiefpass 1. Ordnung (Tustin)
 // ---------------------------------------------------------------------------
@@ -82,6 +87,7 @@ public:
 
     // --- PWM ---
     pwm_max_ = this->declare_parameter<int>("pwm_max", 885);
+    pwm_max_ = std::clamp(pwm_max_, 0, kPwmLimit);
 
     // --- Topics ---
     const auto imu_topic = this->declare_parameter<std::string>("imu_topic", "/imu");
@@ -202,9 +208,12 @@ private:
     double u = -(k_ext_[0] * x[0] + k_ext_[1] * x[1] + k_ext_[2] * x[2] + k_ext_[3] * x[3]);
     u = std::clamp(u, -u_max_, u_max_);
 
-    // Linear auf PWM skalieren: u/u_max * pwm_max, gerundet
-    const int32_t pwm = static_cast<int32_t>(
-      std::round(u / u_max_ * static_cast<double>(pwm_max_)));
+    int32_t pwm = 0;
+    if (std::abs(u_max_) > 1e-9) {
+      // Linear auf PWM skalieren: u/u_max * pwm_max, gerundet
+      pwm = static_cast<int32_t>(std::round(u / u_max_ * static_cast<double>(pwm_max_)));
+    }
+    pwm = std::clamp(pwm, -kPwmLimit, kPwmLimit);
 
     publish_pwm(pwm);
   }
@@ -213,6 +222,7 @@ private:
   // Beide Motoren bekommen denselben PWM-Wert
   void publish_pwm(int32_t pwm)
   {
+    pwm = std::clamp(pwm, -kPwmLimit, kPwmLimit);
     turtlebot3_node::msg::WheelPwm msg;
     msg.left_pwm  = static_cast<int16_t>(pwm);
     msg.right_pwm = static_cast<int16_t>(pwm);
