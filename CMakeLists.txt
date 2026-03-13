@@ -20,9 +20,15 @@ add_executable(state_vector_node_cpp src/state_vector_node.cpp)
 ament_target_dependencies(state_vector_node_cpp rclcpp std_msgs sensor_msgs nav_msgs)
 target_compile_features(state_vector_node_cpp PUBLIC cxx_std_17)
 
+# Kombinierte Node: IMU/Odom -> Tiefpass -> LQR -> /cmd_vel
+add_executable(segway_node src/segway_node.cpp)
+ament_target_dependencies(segway_node rclcpp std_msgs sensor_msgs nav_msgs geometry_msgs)
+target_compile_features(segway_node PUBLIC cxx_std_17)
+
 install(TARGETS
   state_vector_node_cpp
   controller_node_cpp
+  segway_node
   DESTINATION lib/${PROJECT_NAME}
 )
 
