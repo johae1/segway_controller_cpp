@@ -35,8 +35,11 @@ add_executable(segway_node_pwm src/segway_node_pwm.cpp)
 ament_target_dependencies(segway_node_pwm rclcpp std_msgs sensor_msgs nav_msgs)
 target_compile_features(segway_node_pwm PUBLIC cxx_std_17)
 add_dependencies(segway_node_pwm ${PROJECT_NAME}__rosidl_generator_cpp)
-rosidl_target_interfaces(segway_node_pwm
-  ${PROJECT_NAME} "rosidl_typesupport_cpp")
+target_include_directories(segway_node_pwm PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/rosidl_generator_cpp>
+)
+rosidl_get_typesupport_target(cpp_typesupport_target ${PROJECT_NAME} "rosidl_typesupport_cpp")
+target_link_libraries(segway_node_pwm ${cpp_typesupport_target})
 
 install(TARGETS
   state_vector_node_cpp
