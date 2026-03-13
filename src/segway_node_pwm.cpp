@@ -14,9 +14,9 @@
 #include "nav_msgs/msg/odometry.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "sensor_msgs/msg/imu.hpp"
-#include "segway_controller_cpp/msg/wheel_pwm.hpp"
 #include "std_msgs/msg/float64_multi_array.hpp"
 #include "std_msgs/msg/multi_array_dimension.hpp"
+#include "turtlebot3_node/msg/wheel_pwm.hpp"
 
 // ---------------------------------------------------------------------------
 // Diskreter Tiefpass 1. Ordnung (Tustin)
@@ -50,7 +50,7 @@ private:
 // Segway Node (PWM-Ausgang)
 //
 // Subscriber:  /imu, /odom
-// Publisher:   /cmd_pwm  (Int32MultiArray, [pwm_links, pwm_rechts], beide gleich)
+// Publisher:   /cmd_pwm  (turtlebot3_node/msg/WheelPwm, beide gleich)
 //              /state_vector  (Float64MultiArray, optional fuer Debug)
 //
 // Mapping:  u ∈ [-u_max, u_max]  →  pwm ∈ [-885, 885]  (linear)
@@ -107,7 +107,7 @@ public:
       std::bind(&SegwayNodePwm::odom_callback, this, std::placeholders::_1));
 
     // --- Publisher ---
-      cmd_pub_ = this->create_publisher<segway_controller_cpp::msg::WheelPwm>(cmd_topic, 10);
+    cmd_pub_ = this->create_publisher<turtlebot3_node::msg::WheelPwm>(cmd_topic, 10);
 
     if (publish_state_vec_) {
       state_pub_ = this->create_publisher<std_msgs::msg::Float64MultiArray>("/state_vector", 10);
@@ -213,7 +213,7 @@ private:
   // Beide Motoren bekommen denselben PWM-Wert
   void publish_pwm(int32_t pwm)
   {
-    segway_controller_cpp::msg::WheelPwm msg;
+    turtlebot3_node::msg::WheelPwm msg;
     msg.left_pwm  = static_cast<int16_t>(pwm);
     msg.right_pwm = static_cast<int16_t>(pwm);
     cmd_pub_->publish(msg);
@@ -306,7 +306,7 @@ private:
   std::unique_ptr<LowPassFilter> lp_filter_;
   rclcpp::Subscription<sensor_msgs::msg::Imu>::SharedPtr imu_sub_;
   rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr odom_sub_;
-  rclcpp::Publisher<segway_controller_cpp::msg::WheelPwm>::SharedPtr cmd_pub_;
+  rclcpp::Publisher<turtlebot3_node::msg::WheelPwm>::SharedPtr cmd_pub_;
   rclcpp::Publisher<std_msgs::msg::Float64MultiArray>::SharedPtr state_pub_;
   rclcpp::TimerBase::SharedPtr timer_;
 };
