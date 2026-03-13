@@ -7,11 +7,15 @@ endif()
 
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(rosidl_default_generators REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(nav_msgs REQUIRED)
-find_package(turtlebot3_node REQUIRED)
+
+rosidl_generate_interfaces(${PROJECT_NAME}
+  "msg/WheelPwm.msg"
+)
 
 add_executable(controller_node_cpp src/controller_node.cpp)
 ament_target_dependencies(controller_node_cpp rclcpp std_msgs geometry_msgs)
@@ -28,8 +32,9 @@ target_compile_features(segway_node PUBLIC cxx_std_17)
 
 # Kombinierte Node: IMU/Odom -> Tiefpass -> LQR -> /cmd_pwm (PWM [-885, 885])
 add_executable(segway_node_pwm src/segway_node_pwm.cpp)
-ament_target_dependencies(segway_node_pwm rclcpp std_msgs sensor_msgs nav_msgs turtlebot3_node)
+ament_target_dependencies(segway_node_pwm rclcpp std_msgs sensor_msgs nav_msgs)
 target_compile_features(segway_node_pwm PUBLIC cxx_std_17)
+add_dependencies(segway_node_pwm ${PROJECT_NAME}__rosidl_generator_cpp)
 
 install(TARGETS
   state_vector_node_cpp
@@ -38,5 +43,7 @@ install(TARGETS
   segway_node_pwm
   DESTINATION lib/${PROJECT_NAME}
 )
+
+ament_export_dependencies(rosidl_default_runtime)
 
 ament_package()
