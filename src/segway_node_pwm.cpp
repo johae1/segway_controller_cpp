@@ -84,7 +84,7 @@ public:
     u_max_ = this->declare_parameter<double>("u_max", 0.2);
     x_err_max_ = this->declare_parameter<double>("x_err_max", 0.5);
     s_dot_ref_ = this->declare_parameter<double>("s_dot_ref", 0.0);
-    enable_integrator_ = this->declare_parameter<bool>("enable_integrator", true);
+    enable_integrator_ = this->declare_parameter<bool>("enable_integrator", false);
 
     // --- PWM ---
     pwm_max_ = this->declare_parameter<int>("pwm_max", 885);
@@ -94,10 +94,10 @@ public:
     const auto imu_topic = this->declare_parameter<std::string>("imu_topic", "/imu");
     const auto odom_topic = this->declare_parameter<std::string>("odom_topic", "/odom");
     const auto cmd_topic = this->declare_parameter<std::string>("cmd_topic", "/cmd_pwm");
-    publish_state_vec_ = this->declare_parameter<bool>("publish_state_vector", false);
+    publish_state_vec_ = this->declare_parameter<bool>("publish_state_vector", true);
 
     // --- Timing-Stats ---
-    enable_timing_stats_ = this->declare_parameter<bool>("timing_enable", true);
+    enable_timing_stats_ = this->declare_parameter<bool>("timing_enable", false);
     timing_log_interval_s_ = this->declare_parameter<double>("timing_log_interval_s", 5.0);
     warn_jitter_ms_ = this->declare_parameter<double>("timing_warn_jitter_ms", 1.0);
 
