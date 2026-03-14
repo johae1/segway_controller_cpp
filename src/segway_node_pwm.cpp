@@ -84,6 +84,7 @@ public:
     u_max_ = this->declare_parameter<double>("u_max", 0.2);
     x_err_max_ = this->declare_parameter<double>("x_err_max", 0.5);
     s_dot_ref_ = this->declare_parameter<double>("s_dot_ref", 0.0);
+    enable_integrator_ = this->declare_parameter<bool>("enable_integrator", true);
 
     // --- PWM ---
     pwm_max_ = this->declare_parameter<int>("pwm_max", 885);
@@ -193,9 +194,13 @@ private:
 
     active_ = true;
 
-    // Integrator mit Anti-Windup
-    x_err_ += (s_dot_ - s_dot_ref_) * ts_;
-    x_err_ = std::clamp(x_err_, -x_err_max_, x_err_max_);
+    // Integrator optional (per Parameter abschaltbar)
+    if (enable_integrator_) {
+      x_err_ += (s_dot_ - s_dot_ref_) * ts_;
+      x_err_ = std::clamp(x_err_, -x_err_max_, x_err_max_);
+    } else {
+      x_err_ = 0.0;
+    }
 
     // Zustandsvektor: [s_dot_err, phi, phi_dot, x_err]
     const std::array<double, 4> x{
@@ -283,6 +288,7 @@ private:
   double u_max_{0.2};
   double x_err_max_{0.5};
   double s_dot_ref_{0.0};
+  bool enable_integrator_{true};
   int pwm_max_{885};
   bool publish_state_vec_{false};
 
